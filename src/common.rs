@@ -181,14 +181,15 @@ macro_rules! NCX_volume_entry {
 }
 #[macro_export]
 macro_rules! NCX_chapter_entry {
-    ($title: expr, $order: expr, $chap_seq: expr) => {
+    ($title: expr, $order: expr, $chap_seq: expr, $zh_seq: expr) => {
         format_args!(r#"
       <navPoint id="chapter{}" playOrder="{}">
-        <navLabel><text>{}</text></navLabel>
+        <navLabel><text>第{}章 {}</text></navLabel>
         <content src="html/chapter{}.html"/>
       </navPoint>"#,
             $chap_seq,
             $order,
+            $zh_seq,
             $title,
             $chap_seq
         )
@@ -349,10 +350,10 @@ pub const CHAPTER_END: &'static str = r"
 
 pub mod patterns {
     pub const DEFAULT_VOLUME_PAT: &'static str = 
-        r"^\s*第[零一二两三四五六七八九十百千万0-9]{1,4}卷\s*(?<vol_name>\S*)\s*$";
+        r"^\s*第[零一二两三四五六七八九十百千万0-9]{1,4}卷[　 ]+(?<vol_name>\S*)\s*$";
 
     pub const DEFAULT_CHAPTER_PAT: &'static str = 
-        r"^\s*第[零一二两三四五六七八九十百千万0-9]{1,7}章\s*(?<chap_name>\S*)\s*$";
+        r"^\s*第[零一二两三四五六七八九十百千万0-9]{1,7}章[　 ]+(?<chap_name>\S*)\s*$";
 
     pub const DEFAULT_LINE_PAT: &'static str =
         r"^[\s　]*(?<line>[^\s　]+)[\s　]*$";

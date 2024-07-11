@@ -183,7 +183,7 @@ impl From<Args> for Maker {
             cover_ext,
             toc: Toc::new(),
             chapter_reset: make_reset(&extra_chapter),
-            volume_reset: make_reset(&extra_volume)
+            volume_reset: make_reset(&extra_volume),
         }
     }
 }
@@ -344,7 +344,7 @@ impl Maker {
                 VC::Volume((seq, title)) => 
                     ncx.write_fmt(NCX_volume_entry!(title, order+1, seq))?,
                 VC::Chapter((seq, title)) => 
-                    ncx.write_fmt(NCX_chapter_entry!(title, order+1, seq))?,
+                    ncx.write_fmt(NCX_chapter_entry!(title, order+1, seq, num_to_zh(*seq)))?,
             }
         }
         ncx.write(ncx_end(self.toc.vol_count > 0).as_bytes())?;
