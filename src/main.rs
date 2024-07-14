@@ -345,8 +345,17 @@ impl Maker {
         ncx.write_fmt(NCX_header!(&self.name))?;
         for (order, entry) in self.toc.table.iter().enumerate() {
             match entry {
-                VC::Volume((seq, title)) => 
-                    ncx.write_fmt(NCX_volume_entry!(title, order+1, seq))?,
+                VC::Volume((seq, title)) => {
+                    let title = format!("第{}卷 {}", num_to_zh(*seq), title);
+                    // you may find this conditional branch to be confusing, 
+                    // but i'm using macro here, so i have to literally use 1
+                    // to replace seq when seq == 1.
+                    if *seq == 1 {
+                        ncx.write_fmt(NCX_volume_entry!(title, order+1, 1))?
+                    } else {
+                        ncx.write_fmt(NCX_volume_entry!(title, order+1, seq))?
+                    }
+                },
                 VC::Chapter((seq, title)) => 
                     ncx.write_fmt(NCX_chapter_entry!(title, order+1, seq, num_to_zh(*seq)))?,
             }
@@ -365,13 +374,16 @@ impl Maker {
             }
         }
         opf.write(OPF_MID.as_bytes())?;
+
+        for entry in self.toc.table.iter() {
+            match entry {
+                VC::Volume((seq, _)) => 
+                    opf.write_fmt(OPF_itemref!(Volume, seq))?,
+                VC::Chapter((seq, _)) => 
+                    opf.write_fmt(OPF_itemref!(Chapter, seq))?,
+            }
+        }
         
-        for seq in 1..(self.toc.vol_count+1) {
-            opf.write_fmt(OPF_itemref!(Volume, seq))?;
-        }
-        for seq in 1..(self.toc.chap_count+1) {
-            opf.write_fmt(OPF_itemref!(Chapter, seq))?;
-        }
         opf.write(OPF_END.as_bytes())?;
 
         Ok(())

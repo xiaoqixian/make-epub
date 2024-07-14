@@ -149,21 +149,18 @@ macro_rules! NCX_header {
     <navPoint id="coverpage" playOrder="0">
       <navLabel><text>封面</text></navLabel>
       <content src="html/coverpage.html" />
-    </navPoint>
-"#, $title)
+    </navPoint>"#, $title)
     }
 }
 #[macro_export]
 macro_rules! NCX_volume_entry {
     ($title: expr, $order: expr, 1) => {
         format_args!(r#"
-    <navPoint id="volume{}" playOrder="{}"}>
+    <navPoint id="volume1" playOrder="{}">
       <navLabel><text>{}</text></navLabel>
-      <content src="html/volume{}.html" />"#,
-            1,
+      <content src="html/volume1.html" />"#,
             $order,
             $title,
-            1
         )
     };
     ($title: expr, $order: expr, $vol_seq: expr) => {
