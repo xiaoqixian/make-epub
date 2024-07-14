@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     pub fn regexset_test() {
-        use regex::{Regex, Captures};
+        use regex::Regex;
         const SOURCE: &[&'static str] = &[
             r"第一卷 夜游神",
             r"第一回 夜游神",
@@ -67,5 +67,20 @@ mod tests {
     pub fn path_test() {
         use std::path::Path;
         assert_eq!("Gone", Path::new("txt/Gone.txt").file_stem().unwrap());
+    }
+
+    #[test]
+    pub fn macro_test() {
+        macro_rules! partial_match {
+            ($title: expr, 1) => {
+                format!("1 title: {}", $title)
+            };
+            ($title: expr, $seq: expr) => {
+                format!("{} title: {}", $seq, $title)
+            }
+        }
+
+        assert_eq!("1 title: One", partial_match!("One", 1));
+        assert_eq!("2 title: Two", partial_match!("Two", 2));
     }
 }
