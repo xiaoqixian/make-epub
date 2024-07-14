@@ -357,8 +357,4 @@ pub mod patterns {
 
     pub const DEFAULT_LINE_PAT: &'static str =
         r"^[\s　]*(?<line>[^\s　]+)[\s　]*$";
-
-    pub const SKIP_PATS: &[&'static str] = &[
-        r"^[\s　]*$", // skip empty lines
-    ];
 }

@@ -7,7 +7,7 @@ use std::path::Path;
 use std::fs::File;
 
 use clap::Parser;
-use regex::{Regex, RegexSet};
+use regex::Regex;
 
 // this crate
 use make_epub::{
@@ -82,6 +82,7 @@ struct Maker {
     toc: Toc,
     chapter_reset: Vec<Regex>,
     volume_reset: Vec<Regex>,
+    line_reset: Vec<Regex>,
 }
 
 impl Chapter {
@@ -94,8 +95,8 @@ impl Chapter {
     }
 
     #[inline]
-    fn push_line(&mut self, line: String) {
-        self.lines.push(line);
+    fn push_line(&mut self, line: &str) {
+        self.lines.push(String::from(line));
     }
 }
 
@@ -184,6 +185,7 @@ impl From<Args> for Maker {
             toc: Toc::new(),
             chapter_reset: make_reset(&extra_chapter),
             volume_reset: make_reset(&extra_volume),
+            line_reset: vec![Regex::new(patterns::DEFAULT_LINE_PAT).unwrap()]
         }
     }
 }
@@ -262,11 +264,9 @@ impl Maker {
     pub fn make(&mut self) -> Result<(), Error> {
         let reader = BufReader::new(File::open(&self.input)?);
 
-        let skip_re = RegexSet::new(patterns::SKIP_PATS).unwrap();
-
         let mut chapter: Option<Chapter> = None;
 
-        'reading: for (line_num, line) in reader.lines().enumerate() {
+        'reading: for line in reader.lines() {
             let line = line?;
 
             let vol_caps = self.volume_reset.iter()
@@ -293,13 +293,17 @@ impl Maker {
                 continue 'reading;
             }
 
-            if !skip_re.is_match(&line) {
-                chapter
-                    .as_mut()
-                    .expect(&format!("Line {} has no chapter", line_num))
-                    .push_line(line);
+            let line_cap = self.line_reset.iter()
+                .find_map(|re| re.captures(&line));
+            if let Some(line_cap) = line_cap {
+                chapter.as_mut().unwrap().push_line(&line_cap["line"]);
             }
         }
+
+        if let Some(chapter) = chapter {
+            self.make_chapter(chapter)?;
+        }
+
         Ok(())
     }
 
